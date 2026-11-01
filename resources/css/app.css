@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@source "../views";
+@source "../../app";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Vert « ferme » : couleur principale */
+  --color-ferme-50: oklch(97.5% 0.02 150);
+  --color-ferme-100: oklch(94.5% 0.04 150);
+  --color-ferme-200: oklch(89% 0.07 150);
+  --color-ferme-500: oklch(60% 0.13 152);
+  --color-ferme-600: oklch(51% 0.12 153);
+  --color-ferme-700: oklch(43% 0.1 154);
+  --color-ferme-800: oklch(35% 0.08 155);
+  --color-ferme-900: oklch(27% 0.06 156);
+
+  /* Paille : accent chaud */
+  --color-paille-50: oklch(98% 0.02 85);
+  --color-paille-100: oklch(95.5% 0.05 85);
+  --color-paille-500: oklch(76% 0.14 75);
+  --color-paille-700: oklch(52% 0.11 65);
+}
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body { @apply bg-stone-50 text-stone-800 antialiased; }
+  [x-cloak] { display: none !important; }
+  input[type="checkbox"], input[type="radio"] { accent-color: var(--color-ferme-700); }
+  /* Les enfants de grilles ne doivent jamais élargir la page (tableaux larges sur mobile). */
+  .grid > * { min-width: 0; }
+}
+
+@utility carte { @apply rounded-xl border border-stone-200 bg-white shadow-sm; }
+@utility btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50; }
+@utility btn-primaire { @apply btn bg-ferme-700 text-white hover:bg-ferme-800 focus-visible:outline-ferme-700; }
+@utility btn-secondaire { @apply btn border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 focus-visible:outline-stone-400; }
+@utility champ { @apply block w-full min-h-11 rounded-lg border border-stone-300 bg-white px-3 text-base text-stone-900 shadow-xs placeholder:text-stone-400 focus:border-ferme-600 focus:outline-none focus:ring-2 focus:ring-ferme-200 sm:text-sm; }
+@utility etiquette { @apply mb-1.5 block text-sm font-medium text-stone-700; }
+@utility erreur { @apply mt-1.5 text-sm text-red-700; }
+@utility lien-menu { @apply flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900; }
+@utility lien-menu-actif { @apply bg-ferme-50 text-ferme-800 hover:bg-ferme-100 hover:text-ferme-900; }
+@utility badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+
+@layer components {
+  .tableau { @apply min-w-full divide-y divide-stone-200 text-sm; }
+  .tableau th { @apply whitespace-nowrap px-4 py-3 text-left text-xs font-semibold tracking-wide text-stone-500 uppercase; }
+  .tableau td { @apply whitespace-nowrap px-4 py-3 align-middle; }
+}
+
+/* Hors connexion : les formulaires d'écriture sont neutralisés (EC21). */
+html.hors-ligne form[method="POST" i]:not([data-hors-ligne-ok]) button[type="submit"],
+html.hors-ligne form[method="POST" i]:not([data-hors-ligne-ok]) input[type="submit"] { opacity: .45; cursor: not-allowed; }

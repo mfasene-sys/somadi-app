@@ -1,0 +1,1 @@
+<x-onglets :liens="['Aujourd’hui' => route('activites.index'), 'Tâches' => route('activites.taches.index'), 'Planning' => route('activites.planning'), 'Routines' => route('activites.routines.index'), 'Projets' => route('activites.projets'), 'Équipes' => route('activites.equipes')]"/>

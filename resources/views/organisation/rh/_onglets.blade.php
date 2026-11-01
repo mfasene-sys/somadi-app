@@ -1,0 +1,1 @@
+<x-onglets :liens="['Personnel' => route('rh.employes.index'), 'Absences' => route('rh.absences.index'), 'Jours imposés' => route('rh.jours'), 'Retenues' => route('rh.retenues'), 'Clôture annuelle' => route('rh.cloture')]"/>
