@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\CodeConnexion;
+use App\Support\Connexion;
 use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +15,8 @@ use Illuminate\View\View;
 /**
  * RG-ACC-001 / RG-ACC-002 : compte actif retrouvé de façon unique par e-mail, mot de passe vérifié
  * contre le hachage stocké, message d'échec qui ne révèle pas l'existence du compte, session renouvelée.
+ * Authentification renforcée : le mot de passe correct déclenche l'envoi d'un code PIN par e-mail
+ * (voir CodeConnexionController) ; sur téléphone, l'empreinte remplace les deux (EmpreinteController).
  */
 class ConnexionController extends Controller
 {
@@ -48,12 +52,26 @@ class ConnexionController extends Controller
                 ->withErrors(['email' => 'Adresse e-mail ou mot de passe incorrect, ou compte inactif.']);
         }
 
-        Auth::login($user);
-        $request->session()->regenerate();
-        // Compatibilité avec les clés de session de l'ancienne application (RG-ACC-002).
-        $request->session()->put(['id' => $user->id, 'nom' => $user->nom, 'role' => $user->role]);
+        // Second facteur : code PIN envoyé par e-mail. La session ne s'ouvre qu'après le code.
+        if (config('somadi.authentification.pin_email')) {
+            if ($attente = CodeConnexion::attenteAvantEmission($user)) {
+                Journal::enregistrer('connexion.code_bloque', 'ACC', 'utilisateur', $user->id, auteur: $user);
 
-        Journal::enregistrer('connexion.reussie', 'ACC', 'utilisateur', $user->id, auteur: $user);
+                return back()->withInput($request->only('email'))
+                    ->withErrors(['email' => "Trop de codes de connexion demandés pour ce compte. Réessayez dans $attente min."]);
+            }
+            $codeId = CodeConnexion::emettre($user);
+            if (! $codeId) {
+                return back()->withInput($request->only('email'))
+                    ->withErrors(['email' => 'Le code de connexion n’a pas pu être envoyé par e-mail. Réessayez dans un instant ou prévenez un administrateur.']);
+            }
+            $request->session()->regenerate();
+            $request->session()->put(Connexion::ATTENTE, ['user_id' => $user->id, 'code_id' => $codeId, 'depuis' => now()->timestamp]);
+
+            return redirect()->route('login.code');
+        }
+
+        Connexion::ouvrir($request, $user, 'mot_de_passe');
 
         return redirect()->intended(route('accueil'));
     }

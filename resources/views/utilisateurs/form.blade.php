@@ -65,4 +65,23 @@
             <button type="submit" class="btn-primaire">{{ $nouveau ? 'Créer le compte' : 'Enregistrer' }}</button>
         </div>
     </form>
+
+    @if (! $nouveau && \App\Support\Empreintes::active())
+        <section class="carte mt-6 max-w-2xl space-y-3 p-5 sm:p-6">
+            <h2 class="font-semibold text-stone-900">Connexion par empreinte</h2>
+            @if (($empreintes ?? collect())->isEmpty())
+                <p class="text-sm text-stone-500">Aucun téléphone activé pour ce compte.</p>
+            @else
+                <p class="text-sm text-stone-500">
+                    {{ $empreintes->count() }} appareil{{ $empreintes->count() > 1 ? 's' : '' }} :
+                    {{ $empreintes->pluck('appareil')->map(fn ($a) => $a ?: 'Appareil')->implode(', ') }}.
+                    En cas de téléphone perdu ou de départ, retirez-les : la personne devra se reconnecter avec mot de passe et code.
+                </p>
+                <form method="POST" action="{{ route('utilisateurs.empreintes.retirer', $utilisateur) }}">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn-secondaire text-red-700">Retirer toutes les empreintes</button>
+                </form>
+            @endif
+        </section>
+    @endif
 </x-layouts.app>

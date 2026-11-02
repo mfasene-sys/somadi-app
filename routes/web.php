@@ -7,7 +7,9 @@ use App\Http\Controllers\Commercial\RapprochementController;
 use App\Http\Controllers\Commercial\ReservationController;
 use App\Http\Controllers\Commercial\TresorerieController;
 use App\Http\Controllers\Commercial\VenteController;
+use App\Http\Controllers\Auth\CodeConnexionController;
 use App\Http\Controllers\Auth\ConnexionController;
+use App\Http\Controllers\Auth\EmpreinteController;
 use App\Http\Controllers\DroitsController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\ModuleAVenirController;
@@ -40,6 +42,14 @@ Route::view('/hors-ligne', 'hors-ligne')->name('hors_ligne');
 Route::middleware('guest')->group(function () {
     Route::get('/connexion', [ConnexionController::class, 'create'])->name('login');
     Route::post('/connexion', [ConnexionController::class, 'store'])->middleware('throttle:connexion')->name('login.store');
+    // Seconde étape après le mot de passe : code PIN reçu par e-mail.
+    Route::get('/connexion/code', [CodeConnexionController::class, 'create'])->name('login.code');
+    Route::post('/connexion/code', [CodeConnexionController::class, 'store'])->middleware('throttle:code_connexion')->name('login.code.store');
+    Route::post('/connexion/code/renvoyer', [CodeConnexionController::class, 'renvoyer'])->middleware('throttle:code_connexion')->name('login.code.renvoyer');
+    Route::post('/connexion/code/annuler', [CodeConnexionController::class, 'annuler'])->name('login.code.annuler');
+    // Connexion par empreinte (téléphone).
+    Route::post('/connexion/empreinte/options', [EmpreinteController::class, 'optionsConnexion'])->middleware('throttle:empreinte')->name('login.empreinte.options');
+    Route::post('/connexion/empreinte', [EmpreinteController::class, 'connexion'])->middleware('throttle:empreinte')->name('login.empreinte');
 });
 
 Route::middleware(['auth', 'compte.actif'])->group(function () {
@@ -51,6 +61,9 @@ Route::middleware(['auth', 'compte.actif'])->group(function () {
     Route::get('/mon-profil', [ProfilController::class, 'edit'])->name('profil.edit');
     Route::put('/mon-profil', [ProfilController::class, 'update'])->name('profil.update');
     Route::put('/mon-profil/mot-de-passe', [ProfilController::class, 'motDePasse'])->name('profil.mot_de_passe');
+    Route::post('/mon-profil/empreintes/options', [EmpreinteController::class, 'optionsActivation'])->middleware('throttle:empreinte')->name('profil.empreintes.options');
+    Route::post('/mon-profil/empreintes', [EmpreinteController::class, 'activer'])->middleware('throttle:empreinte')->name('profil.empreintes.activer');
+    Route::delete('/mon-profil/empreintes/{id}', [EmpreinteController::class, 'retirer'])->whereNumber('id')->name('profil.empreintes.retirer');
 
     // ---------- Lot 2 : volailles ----------
     Route::prefix('volailles')->group(function () {
@@ -324,6 +337,7 @@ Route::middleware(['auth', 'compte.actif'])->group(function () {
             Route::post('/utilisateurs', [UtilisateurController::class, 'store'])->name('utilisateurs.store');
             Route::get('/utilisateurs/{utilisateur}', [UtilisateurController::class, 'edit'])->whereNumber('utilisateur')->name('utilisateurs.edit');
             Route::put('/utilisateurs/{utilisateur}', [UtilisateurController::class, 'update'])->whereNumber('utilisateur')->name('utilisateurs.update');
+            Route::delete('/utilisateurs/{utilisateur}/empreintes', [EmpreinteController::class, 'retirerTout'])->whereNumber('utilisateur')->name('utilisateurs.empreintes.retirer');
         });
         Route::get('/droits', [DroitsController::class, 'edit'])->middleware('can:ACC.droits')->name('droits.edit');
         Route::put('/droits', [DroitsController::class, 'update'])->middleware('can:ACC.droits')->name('droits.update');

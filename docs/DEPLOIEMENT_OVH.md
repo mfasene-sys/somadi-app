@@ -257,7 +257,49 @@ Même méthode, avec `somadi-lot5.zip` :
    - **Marketing WhatsApp** : les modèles et campagnes existants apparaissent.
 4. Les images des modèles marketing de l'ancienne application sont relues dans son dossier (`SOMADI_RACINE_ANCIENNE`, comme pour les photos d'ovins) ; les nouvelles sont rangées dans `storage/app/marketing`.
 
-## 12. Mettre à jour (lots suivants)
+## 12. Authentification renforcée (code par e-mail, empreinte)
+
+Après cette mise à jour, **le mot de passe seul ne suffit plus** : un code à 6 chiffres est envoyé par e-mail (PC de bureau, ou téléphone sans empreinte). Sur téléphone, l'empreinte peut remplacer mot de passe et code. Détails : [`AUTHENTIFICATION.md`](AUTHENTIFICATION.md).
+
+**Avant de mettre en ligne, l'envoi d'e-mails doit fonctionner**, sinon personne ne pourra se connecter.
+
+1. Dans l'espace client OVH, créez (ou choisissez) une adresse d'envoi, par exemple `no-reply@votre-domaine` (Email Pro ou MX Plan inclus dans l'offre Pro).
+2. Dans `.env`, ajoutez ou complétez :
+   ```ini
+   MAIL_MAILER=smtp
+   MAIL_SCHEME=smtps
+   MAIL_HOST=ssl0.ovh.net
+   MAIL_PORT=465
+   MAIL_USERNAME=no-reply@votre-domaine
+   MAIL_PASSWORD=mot-de-passe-de-cette-adresse
+   MAIL_FROM_ADDRESS="no-reply@votre-domaine"
+   MAIL_FROM_NAME="SOMADI Farming"
+   SOMADI_PIN_EMAIL=true
+   SOMADI_EMPREINTE=true
+   ```
+   `APP_URL` doit être l'adresse exacte du site en `https://` : les empreintes sont rattachées à ce domaine.
+3. **Sauvegarde de la base** (étape 1), puis en SSH :
+   ```bash
+   cd /home/somadix
+   php artisan down
+   unzip -q -o somadi-authentification.zip
+   rm -rf vendor app resources/views
+   cp -a somadi/. /home/somadix/
+   rm -rf somadi somadi-authentification.zip
+   php artisan somadi:installer --force
+   php artisan optimize:clear
+   php artisan config:cache && php artisan route:cache && php artisan view:cache
+   php artisan somadi:tester-email votre@adresse
+   php artisan somadi:verifier
+   php artisan up
+   ```
+   `somadi:installer` crée deux tables : `app_codes_connexion` (codes à usage unique, stockés sous forme d'empreinte HMAC) et `app_empreintes` (clés **publiques** des téléphones). Aucune table existante n'est modifiée ; l'ancienne application continue de se connecter comme avant.
+   Si vous installez à partir du dépôt GitHub plutôt que de l'archive, lancez `composer install --no-dev --optimize-autoloader` : une bibliothèque a été ajoutée (`lbuchs/webauthn`).
+4. Contrôles : `somadi:tester-email` doit arriver (vérifiez les indésirables) ; connectez-vous depuis un PC (code reçu ?), puis depuis un téléphone : Mon profil → « Activer sur ce téléphone », déconnexion, « Se connecter avec mon empreinte ».
+
+**En cas de panne de l'envoi d'e-mails** : mettez `SOMADI_PIN_EMAIL=false` dans `.env` puis `php artisan config:cache`. La connexion revient au mot de passe seul ; les empreintes continuent de fonctionner. Remettez `true` dès que l'envoi est rétabli.
+
+## 13. Mettre à jour (lots suivants)
 
 1. Sauvegarde de la base (étape 1).
 2. `php artisan down` (page de maintenance).
@@ -265,11 +307,11 @@ Même méthode, avec `somadi-lot5.zip` :
 4. `php artisan somadi:installer --force` puis les trois commandes `…:cache`.
 5. `php artisan up`.
 
-## 13. Revenir en arrière
+## 14. Revenir en arrière
 
 La nouvelle application n'a pas modifié la structure des tables existantes. Les saisies faites avec elle (ponte, lots, soins…) sont enregistrées dans les tables habituelles et restent visibles dans l'ancienne application. Pour la retirer complètement :
 - retirez le domaine du multisite et supprimez les dossiers et fichiers ajoutés dans `/home/somadix` à l'étape 4 (en gardant `www/` et vos autres dossiers) ;
-- facultatif : `DROP TABLE app_journal, app_permissions, app_requetes, app_lots_options, app_infra_planning, app_migrations;`
+- facultatif : `DROP TABLE app_journal, app_permissions, app_requetes, app_lots_options, app_infra_planning, app_codes_connexion, app_empreintes, app_migrations;`
 
 L'ancienne application n'est pas affectée.
 

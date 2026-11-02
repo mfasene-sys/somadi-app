@@ -47,7 +47,11 @@ class UtilisateurController extends Controller
 
     public function edit(User $utilisateur): View
     {
-        return view('utilisateurs.form', ['utilisateur' => $utilisateur, 'roles' => Roles::tous()]);
+        return view('utilisateurs.form', [
+            'utilisateur' => $utilisateur,
+            'roles' => Roles::tous(),
+            'empreintes' => DB::table('app_empreintes')->where('user_id', $utilisateur->id)->orderByDesc('cree_le')->get(),
+        ]);
     }
 
     public function update(Request $request, User $utilisateur): RedirectResponse

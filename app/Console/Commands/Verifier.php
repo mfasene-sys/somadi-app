@@ -35,7 +35,7 @@ class Verifier extends Command
         $noms = $tables->pluck('n')->all();
         $this->line(count($noms).' tables trouvées dans « '.$base.' ».');
 
-        foreach (array_merge(self::TABLES_SOCLE, ['app_permissions', 'app_journal']) as $t) {
+        foreach (array_merge(self::TABLES_SOCLE, ['app_permissions', 'app_journal', 'app_codes_connexion', 'app_empreintes']) as $t) {
             if (! in_array($t, $noms, true)) {
                 $this->error("Table manquante : $t");
                 $ok = false;
@@ -76,6 +76,22 @@ class Verifier extends Command
             } else {
                 $this->info("Administrateurs actifs : $admins");
             }
+        }
+
+        // Authentification renforcée : le code PIN part par e-mail, l'empreinte dépend du domaine.
+        if (config('somadi.authentification.pin_email')) {
+            if (! \App\Support\CodeConnexion::envoiConfigure()) {
+                $this->error('Code de connexion par e-mail activé mais aucun envoi configuré (MAIL_MAILER='.config('mail.default').') : personne ne pourra se connecter par mot de passe.');
+                $this->line('  → Renseignez MAIL_MAILER=smtp et les paramètres SMTP dans .env, ou mettez SOMADI_PIN_EMAIL=false en attendant.');
+                $ok = false;
+            } else {
+                $this->info('Code de connexion par e-mail : activé (envoi '.config('mail.default').'). Testez avec : php artisan somadi:tester-email votre@adresse');
+            }
+        } else {
+            $this->warn('Code de connexion par e-mail désactivé (SOMADI_PIN_EMAIL=false) : le mot de passe seul suffit.');
+        }
+        if (config('somadi.authentification.empreinte')) {
+            $this->line('Empreinte : rattachée au domaine « '.config('somadi.authentification.webauthn_domaine').' ». Changer de domaine obligera chacun à la réactiver.');
         }
 
         return $ok ? self::SUCCESS : self::FAILURE;

@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Mail\CodeConnexionMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 /** REC-ACC-001, RG-ACC-001, RG-ACC-002 */
@@ -27,8 +29,18 @@ class ConnexionTest extends TestCase
 
     public function test_compte_actif_et_mot_de_passe_hache_par_l_ancienne_application(): void
     {
+        Mail::fake();
         $u = $this->utilisateur('ouvrier');
-        $this->post('/connexion', ['email' => $u->email, 'mot_de_passe' => 'Secret123'])->assertRedirect('/');
+        // Mot de passe correct : la session ne s'ouvre qu'après le code reçu par e-mail.
+        $this->post('/connexion', ['email' => $u->email, 'mot_de_passe' => 'Secret123'])->assertRedirect('/connexion/code');
+        $this->assertGuest();
+        $code = null;
+        Mail::assertSent(CodeConnexionMail::class, function (CodeConnexionMail $m) use (&$code) {
+            $code = $m->code;
+
+            return true;
+        });
+        $this->post('/connexion/code', ['code' => $code])->assertRedirect('/');
         $this->assertAuthenticatedAs($u);
         // Clés de session de l'ancienne application conservées (RG-ACC-002).
         $this->assertSame($u->id, session('id'));

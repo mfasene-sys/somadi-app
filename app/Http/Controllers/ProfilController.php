@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Empreintes;
 use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,10 @@ class ProfilController extends Controller
 {
     public function edit(Request $request): View
     {
-        return view('profil.edit', ['user' => $request->user()]);
+        return view('profil.edit', [
+            'user' => $request->user(),
+            'empreintes' => Empreintes::active() ? Empreintes::pour($request->user()) : collect(),
+        ]);
     }
 
     public function update(Request $request): RedirectResponse

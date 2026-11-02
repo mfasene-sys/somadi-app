@@ -141,6 +141,21 @@ return [
     // Version applicative inscrite dans les archives de clôture.
     'version' => 'somadi-5.0.0',
 
+    // Authentification renforcée.
+    // - Après le mot de passe, un code PIN à 6 chiffres est envoyé par e-mail (PC de bureau, ou téléphone sans empreinte).
+    // - Sur téléphone, l'empreinte digitale (clé d'accès WebAuthn) remplace mot de passe et code.
+    'authentification' => [
+        // Interrupteur de secours : false = retour au mot de passe seul (par exemple si l'envoi d'e-mails est en panne).
+        'pin_email' => (bool) env('SOMADI_PIN_EMAIL', true),
+        'pin_duree_minutes' => 10,
+        'pin_tentatives' => 5,
+        // Renvois de code autorisés par compte sur 15 minutes.
+        'pin_renvois' => 3,
+        'empreinte' => (bool) env('SOMADI_EMPREINTE', true),
+        // Domaine auquel les empreintes sont rattachées (par défaut : celui d'APP_URL). Le changer invalide les empreintes.
+        'webauthn_domaine' => env('SOMADI_WEBAUTHN_DOMAINE') ?: parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST),
+    ],
+
     // Lot actuellement livré : les modules d'un lot supérieur sont affichés « bientôt disponible ».
     'lot_livre' => (int) env('SOMADI_LOT_LIVRE', 5),
 ];

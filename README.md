@@ -23,10 +23,11 @@ Elle fonctionne sur **la base MySQL existante**, sans en modifier les tables : l
 | 3 | Commercial et finance : réservations, ventes, trésorerie, clôture, rapprochements | **Livré** |
 | 4 | Ovins : animaux, reproduction, soins, transferts, inventaires | **Livré** |
 | 5 | Infrastructures, planning, activités, RH, marketing WhatsApp | **Livré** |
+| + | Authentification renforcée : code PIN par e-mail sur PC, empreinte sur téléphone ([note](docs/AUTHENTIFICATION.md)) | **Livré** |
 
 ## Principes
 
-- **Structure de la base intacte** : la nouvelle application crée uniquement des tables préfixées `app_` (`app_permissions`, `app_journal`, `app_requetes`, `app_lots_options`, `app_infra_planning`, `app_migrations`). Elle écrit dans les tables métier existantes exactement comme l'ancienne application, et ses écritures passent par les mêmes déclencheurs MySQL.
+- **Structure de la base intacte** : la nouvelle application crée uniquement des tables préfixées `app_` (`app_permissions`, `app_journal`, `app_requetes`, `app_lots_options`, `app_infra_planning`, `app_codes_connexion`, `app_empreintes`, `app_migrations`). Elle écrit dans les tables métier existantes exactement comme l'ancienne application, et ses écritures passent par les mêmes déclencheurs MySQL.
 - **Mots de passe compatibles** : hachage `password_hash()` identique à l'ancienne application ; les comptes existants se connectent sans changement.
 - **Droits par action (EC02)** : matrice rôle × action vérifiée côté serveur à chaque requête. Le menu en découle. L'administrateur a tous les droits. La clôture comptable et la gestion de la matrice sont réservées à l'administrateur.
 - **Journal unique (EC19)** : chaque action sensible enregistre l'auteur, l'objet, les valeurs avant et après, la date et l'adresse IP.
@@ -56,6 +57,7 @@ Tests : `php vendor/bin/phpunit`. La suite recrée une base `somadi_test` à par
 |---|---|
 | `php artisan somadi:installer --force` | Crée les tables `app_*` et la matrice par défaut, puis vérifie la base |
 | `php artisan somadi:verifier` | Contrôle en lecture seule : tables, InnoDB (EC23), déclencheurs, rôles, administrateurs |
+| `php artisan somadi:tester-email adresse` | Envoie un e-mail d'essai pour valider la configuration SMTP (codes de connexion) |
 | `php artisan somadi:creer-admin email` | Crée ou réactive un administrateur (mot de passe saisi de façon masquée) |
 
 ## Organisation du code

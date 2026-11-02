@@ -43,6 +43,12 @@ class AppServiceProvider extends ServiceProvider
             ];
         });
 
+        // Saisie du code PIN : au plus 10 envois par minute et par session (chaque code n'accepte de toute façon que 5 essais).
+        RateLimiter::for('code_connexion', fn (Request $request) => Limit::perMinute(10)->by('code:'.$request->session()->getId().'|'.$request->ip()));
+
+        // Empreinte : connexion, et activation (qui redemande le mot de passe).
+        RateLimiter::for('empreinte', fn (Request $request) => Limit::perMinute(10)->by('empreinte:'.($request->user()?->id ?? $request->ip())));
+
         Paginator::useTailwind();
 
         if ($this->app->environment('production')) {

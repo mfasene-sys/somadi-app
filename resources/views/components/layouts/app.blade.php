@@ -76,6 +76,18 @@
             <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">{{ session('erreur') }}</div>
         @endif
 
+        @if (session('proposer_empreinte') && \App\Support\Empreintes::active())
+            {{-- Affiché par empreinte.js seulement sur un téléphone équipé d'un capteur où l'empreinte n'est pas encore utilisée. --}}
+            <div class="mb-5 hidden rounded-lg border border-ferme-200 bg-ferme-50 px-4 py-3 text-sm text-ferme-800" role="status" data-empreinte-proposition>
+                <div class="flex items-center gap-3">
+                    <x-icone nom="empreinte" class="size-6 shrink-0"/>
+                    <p class="flex-1">Connectez-vous plus vite : activez l'empreinte sur ce téléphone, sans mot de passe ni code.</p>
+                    <a href="{{ route('profil.edit') }}#empreinte" class="btn-primaire shrink-0">Activer</a>
+                </div>
+            </div>
+            <script src="{{ asset('js/empreinte.js') }}?v={{ @filemtime(public_path('js/empreinte.js')) }}" defer></script>
+        @endif
+
         {{ $slot }}
     </main>
 </div>
