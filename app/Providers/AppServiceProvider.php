@@ -17,7 +17,19 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Bibliothèque WebAuthn (empreinte) livrée par mise à jour différentielle dans vendor/lbuchs/webauthn,
+        // sans régénérer le chargeur de Composer. Après un « composer install », Composer la charge lui-même
+        // et ce chargeur de secours n'est jamais sollicité.
+        if (! class_exists(\lbuchs\WebAuthn\WebAuthn::class)) {
+            spl_autoload_register(function (string $classe): void {
+                if (str_starts_with($classe, 'lbuchs\\WebAuthn\\')) {
+                    $fichier = base_path('vendor/lbuchs/webauthn/src/'.str_replace('\\', '/', substr($classe, strlen('lbuchs\\WebAuthn\\'))).'.php');
+                    if (is_file($fichier)) {
+                        require $fichier;
+                    }
+                }
+            });
+        }
     }
 
     public function boot(): void

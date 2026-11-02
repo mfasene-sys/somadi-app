@@ -278,22 +278,26 @@ Après cette mise à jour, **le mot de passe seul ne suffit plus** : un code à 
    SOMADI_EMPREINTE=true
    ```
    `APP_URL` doit être l'adresse exacte du site en `https://` : les empreintes sont rattachées à ce domaine.
-3. **Sauvegarde de la base** (étape 1), puis en SSH :
+3. **Sauvegarde de la base** (étape 1). L'archive `somadi-authentification-diff.zip` est **différentielle** : elle ne contient que les fichiers ajoutés ou modifiés depuis le lot 5 (liste dans `LISTE_FICHIERS.txt`). Aucun fichier n'est supprimé. Le dossier `vendor` existant est conservé, seule la bibliothèque `vendor/lbuchs/webauthn` y est ajoutée. En SSH :
    ```bash
    cd /home/somadix
+   unzip -q -o somadi-authentification-diff.zip            # crée le dossier maj-auth/
+   # Copie de sécurité des fichiers qui vont être remplacés (pour revenir en arrière)
+   tar -czf sauvegarde-avant-auth.tgz --ignore-failed-read $(cat maj-auth/LISTE_FICHIERS.txt) 2>/dev/null
+   # Facultatif : vérifier que l'archive est intacte
+   (cd maj-auth/fichiers && sha256sum -c --quiet ../SHA256SUMS.txt) && echo "Archive intacte"
    php artisan down
-   unzip -q -o somadi-authentification.zip
-   rm -rf vendor app resources/views
-   cp -a somadi/. /home/somadix/
-   rm -rf somadi somadi-authentification.zip
+   cp -a maj-auth/fichiers/. /home/somadix/
    php artisan somadi:installer --force
    php artisan optimize:clear
    php artisan config:cache && php artisan route:cache && php artisan view:cache
    php artisan somadi:tester-email votre@adresse
    php artisan somadi:verifier
    php artisan up
+   rm -rf maj-auth somadi-authentification-diff.zip
    ```
    `somadi:installer` crée deux tables : `app_codes_connexion` (codes à usage unique, stockés sous forme d'empreinte HMAC) et `app_empreintes` (clés **publiques** des téléphones). Aucune table existante n'est modifiée ; l'ancienne application continue de se connecter comme avant.
+   Revenir en arrière : `php artisan down`, `tar -xzf sauvegarde-avant-auth.tgz`, supprimer les fichiers marqués « ajouté » dans `LISTE_FICHIERS_DETAIL.txt`, puis les trois commandes `…:cache` et `php artisan up`. Plus simple encore, en cas de souci d'envoi d'e-mails : `SOMADI_PIN_EMAIL=false` (voir plus bas).
    Si vous installez à partir du dépôt GitHub plutôt que de l'archive, lancez `composer install --no-dev --optimize-autoloader` : une bibliothèque a été ajoutée (`lbuchs/webauthn`).
 4. Contrôles : `somadi:tester-email` doit arriver (vérifiez les indésirables) ; connectez-vous depuis un PC (code reçu ?), puis depuis un téléphone : Mon profil → « Activer sur ce téléphone », déconnexion, « Se connecter avec mon empreinte ».
 
