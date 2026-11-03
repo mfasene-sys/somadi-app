@@ -42,7 +42,7 @@
       e.preventDefault();
       alerte('Pas de réseau : la saisie n\'a pas été envoyée. Gardez la page ouverte et réessayez dès le retour de la connexion.');
     }
-    if (form.hasAttribute('data-deconnexion')) { viderCaches(); }
+    if (form.hasAttribute('data-deconnexion')) { viderCaches(); try { sessionStorage.removeItem('somadi-parcours'); } catch (e2) { /* rien */ } }
     // Évite les doubles envois (double appui sur mobile).
     if (methode === 'post' && !e.defaultPrevented) {
       var b = form.querySelector('button[type="submit"]');
@@ -107,6 +107,63 @@
     zone.addEventListener('pointerdown', montrer);
     zone.addEventListener('pointerleave', cacher);
   });
+
+  // ---- Parcours de navigation : bouton Retour et fil d'Ariane ----
+  // Chaque onglet garde la liste des pages traversées (sessionStorage, propre à l'onglet). Le bouton Retour
+  // vise la page précédente de ce parcours ; à défaut (lien direct, favori), la page parente fournie par le serveur.
+  var PARCOURS = 'somadi-parcours';
+  function metaVal(nom) { var m = document.querySelector('meta[name="somadi-' + nom + '"]'); return m ? m.content : null; }
+  function lireParcours() { try { var p = JSON.parse(sessionStorage.getItem(PARCOURS)); return Array.isArray(p) ? p : []; } catch (e) { return []; } }
+  function ecrireParcours(p) { try { sessionStorage.setItem(PARCOURS, JSON.stringify(p.slice(-30))); } catch (e) { /* stockage indisponible */ } }
+
+  var titrePage = metaVal('titre');
+  if (titrePage !== null && !document.documentElement.classList.contains('hors-ligne')) {
+    var ici = {
+      url: location.pathname + location.search,
+      chemin: location.pathname,
+      titre: titrePage,
+      parent: metaVal('parent') || '',
+      formulaire: metaVal('formulaire') === '1',
+      statique: metaVal('statique') === '1'
+    };
+    var parcours = lireParcours();
+    var deja = -1;
+    for (var k = 0; k < parcours.length; k++) { if (parcours[k].chemin === ici.chemin) { deja = k; break; } }
+    if (deja >= 0) {
+      // Page déjà traversée (retour, onglet, rechargement) : on reprend le parcours à cet endroit.
+      parcours = parcours.slice(0, deja);
+    } else if (parcours.length) {
+      var haut = parcours[parcours.length - 1];
+      // Un formulaire quitté (enregistré ou abandonné) ne reste pas dans le parcours.
+      if (haut.formulaire) { parcours.pop(); }
+      // Deux onglets d'une même rubrique se remplacent au lieu de s'empiler.
+      else if (haut.statique && ici.statique && haut.parent && haut.parent === ici.parent) { parcours.pop(); }
+    }
+    parcours.push(ici);
+    ecrireParcours(parcours);
+
+    var precedente = parcours.length > 1 ? parcours[parcours.length - 2] : null;
+    document.querySelectorAll('[data-retour]').forEach(function (a) {
+      if (!precedente) return;
+      a.href = precedente.url;
+      a.title = 'Retour à ' + precedente.titre;
+      var lib = a.querySelector('[data-retour-libelle]');
+      if (lib) lib.textContent = precedente.titre;
+    });
+    // Filtres modifiés sans recharger la page (listes Livewire) : l'adresse finale est retenue en quittant la page.
+    window.addEventListener('pagehide', function () {
+      var p = lireParcours();
+      for (var j = p.length - 1; j >= 0; j--) {
+        if (p[j].chemin === location.pathname) { p[j].url = location.pathname + location.search; ecrireParcours(p); break; }
+      }
+    });
+    // Fil d'Ariane : les pages déjà vues reprennent leur vrai titre et leurs filtres.
+    document.querySelectorAll('[data-fil] a[data-chemin]').forEach(function (a) {
+      for (var j = 0; j < parcours.length; j++) {
+        if (parcours[j].chemin === a.getAttribute('data-chemin')) { a.href = parcours[j].url; a.textContent = parcours[j].titre; break; }
+      }
+    });
+  }
 
   // ---- Service worker ----
   function viderCaches() {

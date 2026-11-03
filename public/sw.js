@@ -4,7 +4,7 @@
  * - Aucune requête d'écriture (POST, PUT…) n'est mise en cache ni rejouée.
  * - À la déconnexion, les pages gardées sont effacées de l'appareil. */
 const PREFIXE = 'somadi-app-';
-const VERSION = PREFIXE + 'v5';
+const VERSION = PREFIXE + 'v6';
 const STATIQUE = VERSION + '-statique';
 const PAGES = VERSION + '-pages';
 const PRECACHE = ['/hors-ligne', '/css/app.css', '/js/app.js', '/icons/icon-192.png', '/manifest.webmanifest'];

@@ -14,6 +14,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#2f6b45">
     <meta name="somadi-genere-le" content="{{ now()->toIso8601String() }}">
+    {{-- Parcours de navigation (bouton Retour, fil d'Ariane) : voir public/js/app.js. --}}
+    <meta name="somadi-titre" content="{{ request()->routeIs('accueil') ? 'Accueil' : ($titre ?? 'Page précédente') }}">
+    <meta name="somadi-parent" content="{{ \App\Support\Navigation::parentDe(request())['chemin'] ?? '' }}">
+    <meta name="somadi-formulaire" content="{{ \App\Support\Navigation::estFormulaire(request()) ? '1' : '0' }}">
+    <meta name="somadi-statique" content="{{ \App\Support\Navigation::estStatique(request()) ? '1' : '0' }}">
     <title>{{ $titrePage }}</title>
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="icon" href="{{ asset('icons/icon-192.png') }}" type="image/png">
@@ -59,6 +64,7 @@
 
     <main class="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">
         @if ($titre)
+            <x-navigation :titre="$titre"/>
             <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight text-stone-900">{{ $titre }}</h1>
