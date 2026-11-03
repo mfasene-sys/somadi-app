@@ -46,7 +46,7 @@ Activer l'empreinte : sur le téléphone, **Mon profil → Connexion par emprein
 | `SOMADI_PIN_EMAIL` | `true` | Code par e-mail après le mot de passe |
 | `SOMADI_EMPREINTE` | `true` | Connexion par empreinte sur téléphone |
 | `SOMADI_WEBAUTHN_DOMAINE` | domaine d'`APP_URL` | Domaine de rattachement des empreintes |
-| `MAIL_*` | — | Envoi : `sendmail` (`-t -i`) sur l'hébergement mutualisé OVH, qui refuse le SMTP sortant |
+| `MAIL_MAILER` | `phpmail` chez OVH | Envoi par la fonction PHP `mail()`, seul moyen autorisé sur l'hébergement mutualisé (SMTP sortant et sendmail refusés). Test : Administration → Utilisateurs → « Tester l'envoi d'e-mail » |
 
 ## Vérifications
 

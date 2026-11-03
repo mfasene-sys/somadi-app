@@ -89,6 +89,25 @@ class UtilisateurController extends Controller
         return redirect()->route('utilisateurs.index')->with('succes', "Le compte de {$utilisateur->nomComplet()} est mis à jour.");
     }
 
+    /**
+     * E-mail d'essai envoyé depuis le site lui-même : chez OVH, la console SSH n'a pas le droit d'envoyer,
+     * seul l'environnement web le peut. Destinataire : l'administrateur connecté.
+     */
+    public function emailEssai(Request $request): RedirectResponse
+    {
+        $moi = $request->user();
+        try {
+            \Illuminate\Support\Facades\Mail::to($moi->email)->send(new \App\Mail\CodeConnexionMail($moi, '000000', 10));
+        } catch (\Throwable $e) {
+            Journal::enregistrer('email.essai_echec', 'ACC', 'utilisateur', $moi->id, apres: ['envoi' => config('mail.default'), 'erreur' => mb_substr($e->getMessage(), 0, 200)]);
+
+            return back()->with('erreur', 'Envoi impossible (« '.config('mail.default').' ») : '.$e->getMessage());
+        }
+        Journal::enregistrer('email.essai', 'ACC', 'utilisateur', $moi->id, apres: ['envoi' => config('mail.default')]);
+
+        return back()->with('succes', 'E-mail d’essai envoyé à '.$moi->email.' (code fictif 000000, envoi « '.config('mail.default').' »). Vérifiez sa réception, y compris dans les courriers indésirables.');
+    }
+
     private function valider(Request $request, ?User $user): array
     {
         return $request->validate([

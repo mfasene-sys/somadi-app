@@ -406,6 +406,24 @@ class AuthentificationRenforceeTest extends TestCase
         $this->get('/connexion')->assertOk()->assertSee('Se connecter avec mon empreinte')->assertSee('Un code de confirmation vous sera envoyé par e-mail.');
     }
 
+    public function test_email_d_essai_envoye_depuis_le_site_par_un_administrateur(): void
+    {
+        $admin = $this->utilisateur('admin');
+        $this->actingAs($admin)->from('/administration/utilisateurs')->post('/administration/email-essai')
+            ->assertRedirect('/administration/utilisateurs')->assertSessionHas('succes');
+        Mail::assertSent(CodeConnexionMail::class, fn ($m) => $m->hasTo($admin->email) && $m->code === '000000');
+        $this->assertDatabaseHas('app_journal', ['action' => 'email.essai', 'user_id' => $admin->id]);
+
+        $this->actingAs($this->utilisateur('ouvrier'))->post('/administration/email-essai')->assertForbidden();
+    }
+
+    public function test_transport_mail_php_enregistre(): void
+    {
+        // Mail::fake() enveloppe le gestionnaire réel : on interroge celui-ci.
+        $reel = (fn () => $this->manager)->call(Mail::getFacadeRoot());
+        $this->assertInstanceOf(\App\Support\TransportMailPhp::class, $reel->mailer('phpmail')->getSymfonyTransport());
+    }
+
     public function test_nom_appareil(): void
     {
         $this->assertSame('iPhone · Safari', \App\Support\Empreintes::nomAppareil('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'));

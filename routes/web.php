@@ -337,6 +337,7 @@ Route::middleware(['auth', 'compte.actif'])->group(function () {
             Route::post('/utilisateurs', [UtilisateurController::class, 'store'])->name('utilisateurs.store');
             Route::get('/utilisateurs/{utilisateur}', [UtilisateurController::class, 'edit'])->whereNumber('utilisateur')->name('utilisateurs.edit');
             Route::put('/utilisateurs/{utilisateur}', [UtilisateurController::class, 'update'])->whereNumber('utilisateur')->name('utilisateurs.update');
+            Route::post('/email-essai', [UtilisateurController::class, 'emailEssai'])->middleware('throttle:empreinte')->name('utilisateurs.email_essai');
             Route::delete('/utilisateurs/{utilisateur}/empreintes', [EmpreinteController::class, 'retirerTout'])->whereNumber('utilisateur')->name('utilisateurs.empreintes.retirer');
         });
         Route::get('/droits', [DroitsController::class, 'edit'])->middleware('can:ACC.droits')->name('droits.edit');

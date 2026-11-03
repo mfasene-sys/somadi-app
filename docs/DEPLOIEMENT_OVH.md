@@ -263,11 +263,10 @@ Après cette mise à jour, **le mot de passe seul ne suffit plus** : un code à 
 
 **Avant de mettre en ligne, l'envoi d'e-mails doit fonctionner**, sinon personne ne pourra se connecter.
 
-1. L'hébergement mutualisé refuse les connexions SMTP sortantes (`Connection refused` sur `ssl0.ovh.net:465`, constaté le 03/11/2026) : les codes partent par le service d'envoi local (`sendmail`). Dans l'espace client, onglet **Scripts e-mail** de l'hébergement, vérifiez qu'il est actif. L'expéditeur doit être une adresse de votre domaine, par exemple `no-reply@votre-domaine`.
+1. L'hébergement mutualisé refuse les connexions SMTP sortantes (`Connection refused` sur `ssl0.ovh.net:465`, constaté le 03/11/2026), et l'appel direct à `sendmail` aussi. Les codes partent donc par la fonction PHP `mail()` (`MAIL_MAILER=phpmail`). La console SSH n'a pas le droit d'envoyer : `somadi:tester-email` y échoue, testez depuis le site (Administration → Utilisateurs → « Tester l'envoi d'e-mail »). Dans l'espace client, onglet **Scripts e-mail** de l'hébergement, vérifiez qu'il est actif. L'expéditeur doit être une adresse de votre domaine, par exemple `no-reply@votre-domaine`.
 2. Dans `.env`, ajoutez ou complétez :
    ```ini
-   MAIL_MAILER=sendmail
-   MAIL_SENDMAIL_PATH="/usr/sbin/sendmail -t -i"
+   MAIL_MAILER=phpmail
    MAIL_FROM_ADDRESS="no-reply@votre-domaine"
    MAIL_FROM_NAME="SOMADI Farming"
    SOMADI_PIN_EMAIL=true

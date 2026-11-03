@@ -65,6 +65,11 @@ return [
             'transport' => 'resend',
         ],
 
+        // Fonction PHP mail() : seul envoi autorisé depuis l'hébergement mutualisé OVH (voir App\Support\TransportMailPhp).
+        'phpmail' => [
+            'transport' => 'phpmail',
+        ],
+
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),

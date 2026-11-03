@@ -4,11 +4,13 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Support\Droits;
+use App\Support\TransportMailPhp;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -54,6 +56,8 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perMinute(20)->by('ip:'.$request->ip()),
             ];
         });
+
+        Mail::extend('phpmail', fn () => new TransportMailPhp());
 
         // Saisie du code PIN : au plus 10 envois par minute et par session (chaque code n'accepte de toute façon que 5 essais).
         RateLimiter::for('code_connexion', fn (Request $request) => Limit::perMinute(10)->by('code:'.$request->session()->getId().'|'.$request->ip()));

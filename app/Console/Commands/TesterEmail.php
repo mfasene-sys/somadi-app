@@ -27,6 +27,8 @@ class TesterEmail extends Command
             Mail::to($email)->send(new CodeConnexionMail($user, '000000', 10));
         } catch (\Throwable $e) {
             $this->error('Envoi impossible : '.$e->getMessage());
+            $this->line('Sur l\'hébergement mutualisé OVH, la console SSH n\'a pas le droit d\'envoyer d\'e-mails : testez depuis le site,');
+            $this->line('Administration → Utilisateurs → « Tester l\'envoi d\'e-mail » (avec MAIL_MAILER=phpmail).');
 
             return self::FAILURE;
         }
