@@ -263,15 +263,11 @@ Après cette mise à jour, **le mot de passe seul ne suffit plus** : un code à 
 
 **Avant de mettre en ligne, l'envoi d'e-mails doit fonctionner**, sinon personne ne pourra se connecter.
 
-1. Dans l'espace client OVH, créez (ou choisissez) une adresse d'envoi, par exemple `no-reply@votre-domaine` (Email Pro ou MX Plan inclus dans l'offre Pro).
+1. L'hébergement mutualisé refuse les connexions SMTP sortantes (`Connection refused` sur `ssl0.ovh.net:465`, constaté le 03/11/2026) : les codes partent par le service d'envoi local (`sendmail`). Dans l'espace client, onglet **Scripts e-mail** de l'hébergement, vérifiez qu'il est actif. L'expéditeur doit être une adresse de votre domaine, par exemple `no-reply@votre-domaine`.
 2. Dans `.env`, ajoutez ou complétez :
    ```ini
-   MAIL_MAILER=smtp
-   MAIL_SCHEME=smtps
-   MAIL_HOST=ssl0.ovh.net
-   MAIL_PORT=465
-   MAIL_USERNAME=no-reply@votre-domaine
-   MAIL_PASSWORD=mot-de-passe-de-cette-adresse
+   MAIL_MAILER=sendmail
+   MAIL_SENDMAIL_PATH="/usr/sbin/sendmail -t -i"
    MAIL_FROM_ADDRESS="no-reply@votre-domaine"
    MAIL_FROM_NAME="SOMADI Farming"
    SOMADI_PIN_EMAIL=true

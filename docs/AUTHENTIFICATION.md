@@ -46,7 +46,7 @@ Activer l'empreinte : sur le téléphone, **Mon profil → Connexion par emprein
 | `SOMADI_PIN_EMAIL` | `true` | Code par e-mail après le mot de passe |
 | `SOMADI_EMPREINTE` | `true` | Connexion par empreinte sur téléphone |
 | `SOMADI_WEBAUTHN_DOMAINE` | domaine d'`APP_URL` | Domaine de rattachement des empreintes |
-| `MAIL_*` | — | Envoi SMTP (OVH : `ssl0.ovh.net`, port 465, `smtps`) |
+| `MAIL_*` | — | Envoi : `sendmail` (`-t -i`) sur l'hébergement mutualisé OVH, qui refuse le SMTP sortant |
 
 ## Vérifications
 
