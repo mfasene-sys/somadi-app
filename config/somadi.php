@@ -152,6 +152,9 @@ return [
         // Renvois de code autorisés par compte sur 15 minutes.
         'pin_renvois' => 3,
         'empreinte' => (bool) env('SOMADI_EMPREINTE', true),
+        // Application d'authentification (codes à 6 chiffres qui changent toutes les 30 s) et codes de secours.
+        'authentificateur' => (bool) env('SOMADI_AUTHENTIFICATEUR', true),
+        'authentificateur_emetteur' => 'SOMADI Farming',
         // Domaine auquel les empreintes sont rattachées (par défaut : celui d'APP_URL). Le changer invalide les empreintes.
         'webauthn_domaine' => env('SOMADI_WEBAUTHN_DOMAINE') ?: parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST),
     ],

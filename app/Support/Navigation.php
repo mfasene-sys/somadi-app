@@ -32,6 +32,8 @@ class Navigation
         'ovins.soins.modele.create' => 'ovins.soins.catalogue',
         'profil.edit' => 'accueil',
         'identite.index' => 'accueil',
+        'profil.authentificateur.create' => 'profil.edit',
+        'profil.authentificateur.codes' => 'profil.edit',
         'module.a_venir' => 'accueil',
     ];
 
@@ -135,7 +137,7 @@ class Navigation
         $nom = (string) $request->route()?->getName();
 
         return (bool) preg_match('/\.create$/', $nom)
-            || in_array($nom, ['utilisateurs.edit', 'exercices.cloture'], true)
+            || in_array($nom, ['utilisateurs.edit', 'exercices.cloture', 'profil.authentificateur.codes'], true)
             || (bool) preg_match('#/(nouveau|nouvelle|modifier|chargement)$#', $request->path());
     }
 

@@ -39,12 +39,25 @@ Activer l'empreinte : sur le téléphone, **Mon profil → Connexion par emprein
 - **Ancienne application** : elle garde sa connexion par mot de passe seul, tant qu'elle reste en ligne.
 - La distinction PC / téléphone se fait dans le navigateur. Elle sert l'ergonomie, pas la sécurité : quel que soit l'appareil, une connexion exige soit mot de passe + code, soit une empreinte activée.
 
+## Application d'authentification et codes de secours (08/11/2026)
+
+Alternative au code par e-mail, choisie par chaque utilisateur dans **Mon profil → Application d'authentification**.
+
+- **Activation** : installer Google Authenticator ou Microsoft Authenticator (gratuites), scanner le QR code (ou saisir la clé à la main), puis confirmer avec le code affiché et le mot de passe. Le QR code est fabriqué par l'application elle-même : la clé ne passe par aucun service extérieur.
+- **Connexion** : après le mot de passe, on saisit le code à 6 chiffres affiché par l'application (il change toutes les 30 s, un décalage de 30 s de l'horloge est toléré). **Aucun e-mail n'est envoyé.** Le lien « Recevoir plutôt un code par e-mail » reste disponible, et « Utiliser l'application » permet de revenir.
+- **Codes de secours** : 10 codes à usage unique (`XXXXX-XXXXX`), affichés une seule fois à l'activation, à imprimer ou télécharger. On les saisit via « Utiliser un code de secours » quand ni le téléphone ni l'e-mail ne sont disponibles. Quand il en reste 3 ou moins, l'application invite à en créer de nouveaux (Mon profil, avec le mot de passe ; les anciens cessent alors de fonctionner).
+- **Désactivation** par l'utilisateur (mot de passe), ou **retrait par l'administrateur** sur la fiche utilisateur (téléphone perdu sans codes de secours). Changement de téléphone : désactiver, puis réactiver depuis le nouveau.
+- **Sécurité** : la clé est chiffrée avec `APP_KEY` (table `app_authentificateurs`), les codes de secours ne sont conservés que sous forme d'empreinte HMAC (`app_codes_secours`). Un code de l'application n'est accepté qu'une fois. Les essais sont limités : 5 par demande de connexion, 10 par quart d'heure et par compte. L'application reste exigée même si `SOMADI_PIN_EMAIL=false`.
+- **Attention** : changer `APP_KEY` rend les clés et les codes de secours inutilisables. Chacun devrait alors réactiver l'application (en se connectant avec le code par e-mail, après retrait par l'administrateur).
+- Journal : `authentificateur.activation`, `authentificateur.codes_secours`, `authentificateur.desactivation`, `authentificateur.retrait_admin`, `connexion.code_secours`, et `connexion.code_refuse` (type `application` ou `secours`).
+
 ## Réglages (`.env`)
 
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `SOMADI_PIN_EMAIL` | `true` | Code par e-mail après le mot de passe |
 | `SOMADI_EMPREINTE` | `true` | Connexion par empreinte sur téléphone |
+| `SOMADI_AUTHENTIFICATEUR` | `true` | Application d'authentification et codes de secours (`false` masque la rubrique et revient au code par e-mail pour tous) |
 | `SOMADI_WEBAUTHN_DOMAINE` | domaine d'`APP_URL` | Domaine de rattachement des empreintes |
 | `MAIL_MAILER` | `phpmail` chez OVH | Envoi par la fonction PHP `mail()`, seul moyen autorisé sur l'hébergement mutualisé (SMTP sortant et sendmail refusés). Test : Administration → Utilisateurs → « Tester l'envoi d'e-mail » |
 

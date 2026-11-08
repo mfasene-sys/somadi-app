@@ -35,7 +35,7 @@ class Verifier extends Command
         $noms = $tables->pluck('n')->all();
         $this->line(count($noms).' tables trouvées dans « '.$base.' ».');
 
-        foreach (array_merge(self::TABLES_SOCLE, ['app_permissions', 'app_journal', 'app_codes_connexion', 'app_empreintes']) as $t) {
+        foreach (array_merge(self::TABLES_SOCLE, ['app_permissions', 'app_journal', 'app_codes_connexion', 'app_empreintes', 'app_authentificateurs', 'app_codes_secours']) as $t) {
             if (! in_array($t, $noms, true)) {
                 $this->error("Table manquante : $t");
                 $ok = false;

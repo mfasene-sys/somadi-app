@@ -322,7 +322,31 @@ Permet à un administrateur d'agir sous le compte d'un autre utilisateur puis de
 3. Contrôles : connecté en administrateur, menu → « Changer d'identité », prendre l'identité d'un ouvrier : le bandeau jaune apparaît et le menu se réduit à ses droits. « Revenir à mon compte », puis Administration → Utilisateurs → Journal : les lignes `identite.debut` / `identite.fin` portent « par … ».
 4. Revenir en arrière : `php artisan down`, `tar -xzf sauvegarde-avant-identite.tgz`, supprimer les fichiers marqués « ajouté » dans `LISTE_FICHIERS_DETAIL.txt`, `php artisan optimize:clear`, les trois commandes `…:cache`, puis `php artisan up`. Les deux colonnes ajoutées peuvent rester : elles sont ignorées.
 
-## 14. Mettre à jour (lots suivants)
+## 14. Application d'authentification et codes de secours
+
+À installer **après** le changement d'identité (section 13) : l'archive `somadi-authentificateur-diff.zip` part de cette version. Elle contient aussi le correctif d'expéditeur des e-mails (même fichier que `somadi-correctif-expediteur.zip`). Détails : [`AUTHENTIFICATION.md`](AUTHENTIFICATION.md).
+
+1. **Sauvegarde de la base** (étape 1).
+2. En SSH :
+   ```bash
+   cd /home/somadix
+   unzip -q -o somadi-authentificateur-diff.zip             # crée le dossier maj-authentificateur/
+   tar -czf sauvegarde-avant-authentificateur.tgz --ignore-failed-read $(cat maj-authentificateur/LISTE_FICHIERS.txt) 2>/dev/null
+   (cd maj-authentificateur/fichiers && sha256sum -c --quiet ../SHA256SUMS.txt) && echo "Archive intacte"
+   php artisan down
+   cp -a maj-authentificateur/fichiers/. /home/somadix/
+   php artisan somadi:installer --force
+   php artisan optimize:clear
+   php artisan config:cache && php artisan route:cache && php artisan view:cache
+   php artisan somadi:verifier
+   php artisan up
+   rm -rf maj-authentificateur somadi-authentificateur-diff.zip
+   ```
+   `somadi:installer` crée deux tables : `app_authentificateurs` (clés chiffrées) et `app_codes_secours` (empreintes des codes). Aucune table existante n'est modifiée. Rien ne change pour les utilisateurs tant qu'ils n'activent pas l'application.
+3. Contrôles : Mon profil → « Activer l'application d'authentification », scanner, confirmer, imprimer les codes de secours. Se déconnecter, se reconnecter : après le mot de passe, la page demande le code de l'application, sans e-mail.
+4. Revenir en arrière : `php artisan down`, `tar -xzf sauvegarde-avant-authentificateur.tgz`, supprimer les fichiers marqués « ajouté » dans `LISTE_FICHIERS_DETAIL.txt`, `php artisan optimize:clear`, les trois commandes `…:cache`, `php artisan up`. Ou plus simplement : `SOMADI_AUTHENTIFICATEUR=false` dans `.env` puis `php artisan config:cache` (retour au code par e-mail pour tous).
+
+## 15. Mettre à jour (lots suivants)
 
 1. Sauvegarde de la base (étape 1).
 2. `php artisan down` (page de maintenance).
@@ -330,11 +354,11 @@ Permet à un administrateur d'agir sous le compte d'un autre utilisateur puis de
 4. `php artisan somadi:installer --force` puis les trois commandes `…:cache`.
 5. `php artisan up`.
 
-## 15. Revenir en arrière
+## 16. Revenir en arrière
 
 La nouvelle application n'a pas modifié la structure des tables existantes. Les saisies faites avec elle (ponte, lots, soins…) sont enregistrées dans les tables habituelles et restent visibles dans l'ancienne application. Pour la retirer complètement :
 - retirez le domaine du multisite et supprimez les dossiers et fichiers ajoutés dans `/home/somadix` à l'étape 4 (en gardant `www/` et vos autres dossiers) ;
-- facultatif : `DROP TABLE app_journal, app_permissions, app_requetes, app_lots_options, app_infra_planning, app_codes_connexion, app_empreintes, app_migrations;`
+- facultatif : `DROP TABLE app_journal, app_permissions, app_requetes, app_lots_options, app_infra_planning, app_codes_connexion, app_empreintes, app_authentificateurs, app_codes_secours, app_migrations;`
 
 L'ancienne application n'est pas affectée.
 

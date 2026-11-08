@@ -74,6 +74,21 @@
         </div>
     </form>
 
+    @if (! $nouveau && \App\Support\Authentificateur::disponible() && ($appli = \App\Support\Authentificateur::infos($utilisateur)))
+        <section class="carte mt-6 max-w-2xl space-y-3 p-5 sm:p-6">
+            <h2 class="font-semibold text-stone-900">Application d'authentification</h2>
+            <p class="text-sm text-stone-500">
+                Activée le {{ \Illuminate\Support\Carbon::parse($appli->active_le)->format('d/m/Y') }}
+                · {{ \App\Support\Authentificateur::codesSecoursRestants($utilisateur) }} code(s) de secours restant(s).
+                Téléphone perdu et plus de codes de secours ? Retirez-la : la personne recevra de nouveau son code par e-mail.
+            </p>
+            <form method="POST" action="{{ route('utilisateurs.authentificateur.retirer', $utilisateur) }}">
+                @csrf @method('DELETE')
+                <button type="submit" class="btn-secondaire text-red-700">Retirer l'application d'authentification</button>
+            </form>
+        </section>
+    @endif
+
     @if (! $nouveau && \App\Support\Empreintes::active())
         <section class="carte mt-6 max-w-2xl space-y-3 p-5 sm:p-6">
             <h2 class="font-semibold text-stone-900">Connexion par empreinte</h2>

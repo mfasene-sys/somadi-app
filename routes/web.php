@@ -10,6 +10,7 @@ use App\Http\Controllers\Commercial\VenteController;
 use App\Http\Controllers\Auth\CodeConnexionController;
 use App\Http\Controllers\Auth\ConnexionController;
 use App\Http\Controllers\Auth\EmpreinteController;
+use App\Http\Controllers\AuthentificateurController;
 use App\Http\Controllers\DroitsController;
 use App\Http\Controllers\IdentiteController;
 use App\Http\Controllers\JournalController;
@@ -43,11 +44,12 @@ Route::view('/hors-ligne', 'hors-ligne')->name('hors_ligne');
 Route::middleware('guest')->group(function () {
     Route::get('/connexion', [ConnexionController::class, 'create'])->name('login');
     Route::post('/connexion', [ConnexionController::class, 'store'])->middleware('throttle:connexion')->name('login.store');
-    // Seconde étape après le mot de passe : code PIN reçu par e-mail.
+    // Seconde étape après le mot de passe : code de l'application d'authentification, code reçu par e-mail ou code de secours.
     Route::get('/connexion/code', [CodeConnexionController::class, 'create'])->name('login.code');
     Route::post('/connexion/code', [CodeConnexionController::class, 'store'])->middleware('throttle:code_connexion')->name('login.code.store');
     Route::post('/connexion/code/renvoyer', [CodeConnexionController::class, 'renvoyer'])->middleware('throttle:code_connexion')->name('login.code.renvoyer');
     Route::post('/connexion/code/annuler', [CodeConnexionController::class, 'annuler'])->name('login.code.annuler');
+    Route::post('/connexion/code/application', [CodeConnexionController::class, 'application'])->name('login.code.application');
     // Connexion par empreinte (téléphone).
     Route::post('/connexion/empreinte/options', [EmpreinteController::class, 'optionsConnexion'])->middleware('throttle:empreinte')->name('login.empreinte.options');
     Route::post('/connexion/empreinte', [EmpreinteController::class, 'connexion'])->middleware('throttle:empreinte')->name('login.empreinte');
@@ -65,6 +67,12 @@ Route::middleware(['auth', 'compte.actif'])->group(function () {
     Route::post('/mon-profil/empreintes/options', [EmpreinteController::class, 'optionsActivation'])->middleware('throttle:empreinte')->name('profil.empreintes.options');
     Route::post('/mon-profil/empreintes', [EmpreinteController::class, 'activer'])->middleware('throttle:empreinte')->name('profil.empreintes.activer');
     Route::delete('/mon-profil/empreintes/{id}', [EmpreinteController::class, 'retirer'])->whereNumber('id')->name('profil.empreintes.retirer');
+    // Application d'authentification et codes de secours.
+    Route::get('/mon-profil/authentificateur', [AuthentificateurController::class, 'create'])->name('profil.authentificateur.create');
+    Route::post('/mon-profil/authentificateur', [AuthentificateurController::class, 'activer'])->middleware('throttle:empreinte')->name('profil.authentificateur.activer');
+    Route::delete('/mon-profil/authentificateur', [AuthentificateurController::class, 'desactiver'])->middleware('throttle:empreinte')->name('profil.authentificateur.desactiver');
+    Route::get('/mon-profil/authentificateur/codes', [AuthentificateurController::class, 'codes'])->name('profil.authentificateur.codes');
+    Route::post('/mon-profil/authentificateur/codes', [AuthentificateurController::class, 'regenerer'])->middleware('throttle:empreinte')->name('profil.authentificateur.regenerer');
 
     // Changement d'identité (administrateur) : pas de « can: », l'administrateur réel est contrôlé dans le contrôleur.
     Route::get('/identite', [IdentiteController::class, 'index'])->name('identite.index');
@@ -345,6 +353,7 @@ Route::middleware(['auth', 'compte.actif'])->group(function () {
             Route::put('/utilisateurs/{utilisateur}', [UtilisateurController::class, 'update'])->whereNumber('utilisateur')->name('utilisateurs.update');
             Route::post('/email-essai', [UtilisateurController::class, 'emailEssai'])->middleware('throttle:empreinte')->name('utilisateurs.email_essai');
             Route::delete('/utilisateurs/{utilisateur}/empreintes', [EmpreinteController::class, 'retirerTout'])->whereNumber('utilisateur')->name('utilisateurs.empreintes.retirer');
+            Route::delete('/utilisateurs/{utilisateur}/authentificateur', [AuthentificateurController::class, 'retirerAdmin'])->whereNumber('utilisateur')->name('utilisateurs.authentificateur.retirer');
         });
         Route::get('/droits', [DroitsController::class, 'edit'])->middleware('can:ACC.droits')->name('droits.edit');
         Route::put('/droits', [DroitsController::class, 'update'])->middleware('can:ACC.droits')->name('droits.update');

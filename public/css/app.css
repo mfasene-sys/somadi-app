@@ -18,3 +18,13 @@
 .btn-identite:hover{background:#5a3d0f}
 .avatar-identite{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--color-paille-500,#e0b44f)}
 .journal-agi-par{color:#7a5212;font-size:.75rem}
+
+/* Application d'authentification : QR code, clé, codes de secours (ajout manuel, hors compilation Tailwind). */
+.qr-authentificateur{display:inline-block;padding:.5rem;background:#fff;border:1px solid var(--color-stone-200,#e7e5e4);border-radius:.75rem}
+.qr-authentificateur svg{display:block;width:220px;height:220px;max-width:100%}
+.cle-authentificateur{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1rem;letter-spacing:.05em;word-break:break-all;user-select:all;background:var(--color-stone-50,#fafaf9);border-radius:.5rem;padding:.5rem .75rem}
+.codes-secours{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem 1.5rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.0625rem;letter-spacing:.05em;padding:1rem 1.25rem;border:1px dashed var(--color-stone-300,#d6d3d1);border-radius:.75rem;background:#fff;counter-reset:code}
+.codes-secours li{list-style:none}
+.codes-secours li::before{counter-increment:code;content:counter(code) ". ";color:var(--color-stone-400,#a8a29e)}
+@media print{.non-imprime,aside,header,nav,#bandeau-hors-ligne,.bandeau-identite{display:none!important}.lg\:pl-64{padding-left:0!important}}
+.self-start{align-self:flex-start}

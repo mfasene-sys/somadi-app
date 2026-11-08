@@ -26,6 +26,8 @@ class Identite
     public const ROUTES_BLOQUEES = [
         'profil.update', 'profil.mot_de_passe',
         'profil.empreintes.options', 'profil.empreintes.activer', 'profil.empreintes.retirer',
+        'profil.authentificateur.create', 'profil.authentificateur.activer', 'profil.authentificateur.desactiver',
+        'profil.authentificateur.codes', 'profil.authentificateur.regenerer', 'utilisateurs.authentificateur.retirer',
         'utilisateurs.create', 'utilisateurs.store', 'utilisateurs.update', 'utilisateurs.empreintes.retirer', 'utilisateurs.email_essai',
         'droits.edit', 'droits.update',
     ];

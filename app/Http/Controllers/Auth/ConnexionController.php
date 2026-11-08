@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Authentificateur;
 use App\Support\CodeConnexion;
 use App\Support\Connexion;
 use App\Support\Journal;
@@ -52,6 +53,14 @@ class ConnexionController extends Controller
                 ->withErrors(['email' => 'Adresse e-mail ou mot de passe incorrect, ou compte inactif.']);
         }
 
+        // Second facteur par l'application d'authentification, si le compte l'a activée (pas d'e-mail envoyé).
+        if (Authentificateur::actif($user)) {
+            $request->session()->regenerate();
+            $request->session()->put(Connexion::ATTENTE, ['user_id' => $user->id, 'code_id' => null, 'depuis' => now()->timestamp, 'mode' => 'appli', 'essais' => 0]);
+
+            return redirect()->route('login.code');
+        }
+
         // Second facteur : code PIN envoyé par e-mail. La session ne s'ouvre qu'après le code.
         if (config('somadi.authentification.pin_email')) {
             if ($attente = CodeConnexion::attenteAvantEmission($user)) {
@@ -66,7 +75,7 @@ class ConnexionController extends Controller
                     ->withErrors(['email' => 'Le code de connexion n’a pas pu être envoyé par e-mail. Réessayez dans un instant ou prévenez un administrateur.']);
             }
             $request->session()->regenerate();
-            $request->session()->put(Connexion::ATTENTE, ['user_id' => $user->id, 'code_id' => $codeId, 'depuis' => now()->timestamp]);
+            $request->session()->put(Connexion::ATTENTE, ['user_id' => $user->id, 'code_id' => $codeId, 'depuis' => now()->timestamp, 'mode' => 'email', 'essais' => 0]);
 
             return redirect()->route('login.code');
         }

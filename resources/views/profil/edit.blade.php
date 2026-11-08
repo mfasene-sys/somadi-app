@@ -37,6 +37,48 @@
             <button type="submit" class="btn-primaire">Changer le mot de passe</button>
         </form>
 
+        @if (\App\Support\Authentificateur::disponible())
+            <section class="carte space-y-4 p-5 sm:p-6 lg:col-span-2" id="authentificateur">
+                <div class="flex items-center gap-2">
+                    <x-icone nom="lock" class="size-5 text-ferme-700"/>
+                    <h2 class="font-semibold text-stone-900">Application d'authentification</h2>
+                </div>
+                @if ($authentificateur)
+                    <p class="text-sm text-stone-600">
+                        <strong class="text-ferme-700">Activée</strong> le {{ \Illuminate\Support\Carbon::parse($authentificateur->active_le)->format('d/m/Y') }}.
+                        À la connexion, le code de l'application remplace celui reçu par e-mail.
+                        Codes de secours restants : <strong>{{ $secoursRestants }}</strong> sur {{ \App\Support\Authentificateur::NB_CODES_SECOURS }}.
+                    </p>
+                    @if ($secoursRestants <= 3)
+                        <p class="rounded-lg border border-paille-500/40 bg-paille-50 px-3 py-2 text-sm text-paille-700">Il vous reste peu de codes de secours : créez-en de nouveaux.</p>
+                    @endif
+                    @error('mot_de_passe_authentificateur')<p class="erreur">{{ $message }}</p>@enderror
+                    @error('mot_de_passe')<p class="erreur">{{ $message }}</p>@enderror
+                    <div class="grid gap-4 border-t border-stone-100 pt-4 sm:grid-cols-2">
+                        <form method="POST" action="{{ route('profil.authentificateur.regenerer') }}" class="space-y-3">
+                            @csrf
+                            <label for="mdp_secours" class="etiquette">Nouveaux codes de secours (mot de passe)</label>
+                            <input id="mdp_secours" name="mot_de_passe" type="password" autocomplete="current-password" required class="champ">
+                            <button type="submit" class="btn-secondaire">Créer de nouveaux codes</button>
+                        </form>
+                        <form method="POST" action="{{ route('profil.authentificateur.desactiver') }}" class="space-y-3">
+                            @csrf @method('DELETE')
+                            <label for="mdp_desactiver" class="etiquette">Désactiver (mot de passe)</label>
+                            <input id="mdp_desactiver" name="mot_de_passe" type="password" autocomplete="current-password" required class="champ">
+                            <button type="submit" class="btn-secondaire text-red-700">Désactiver</button>
+                        </form>
+                    </div>
+                    <p class="text-xs text-stone-500">Nouveau téléphone : désactivez, puis activez de nouveau depuis le nouveau téléphone.</p>
+                @else
+                    <p class="text-sm text-stone-600">
+                        Recevez votre code de connexion sur votre téléphone, avec Google Authenticator ou Microsoft Authenticator, au lieu de l'attendre par e-mail.
+                        Il fonctionne sans réseau. Vous recevrez aussi 10 codes de secours, utiles si vous perdez votre téléphone.
+                    </p>
+                    <a href="{{ route('profil.authentificateur.create') }}" class="btn-primaire">Activer l'application d'authentification</a>
+                @endif
+            </section>
+        @endif
+
         @if (\App\Support\Empreintes::active())
             <section class="carte space-y-4 p-5 sm:p-6 lg:col-span-2" id="empreinte"
                      data-empreinte-activation data-options="{{ route('profil.empreintes.options') }}" data-activer="{{ route('profil.empreintes.activer') }}">

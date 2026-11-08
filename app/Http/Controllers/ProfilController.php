@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Authentificateur;
 use App\Support\Empreintes;
 use App\Support\Journal;
 use Illuminate\Http\RedirectResponse;
@@ -17,6 +18,8 @@ class ProfilController extends Controller
         return view('profil.edit', [
             'user' => $request->user(),
             'empreintes' => Empreintes::active() ? Empreintes::pour($request->user()) : collect(),
+            'authentificateur' => Authentificateur::disponible() ? Authentificateur::infos($request->user()) : null,
+            'secoursRestants' => Authentificateur::disponible() ? Authentificateur::codesSecoursRestants($request->user()) : 0,
         ]);
     }
 
