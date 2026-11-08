@@ -26,7 +26,13 @@ class JournalController extends Controller
             $q->where('action', 'like', str_replace(['%', '_'], ['\%', '\_'], $f['action']).'%');
         }
         if (! empty($f['utilisateur'])) {
-            $q->where('user_id', $f['utilisateur']);
+            // Un administrateur retrouve aussi ce qu'il a fait sous l'identité d'un autre.
+            $q->where(function ($w) use ($f) {
+                $w->where('user_id', $f['utilisateur']);
+                if (\Illuminate\Support\Facades\Schema::hasColumn('app_journal', 'agi_par_id')) {
+                    $w->orWhere('agi_par_id', $f['utilisateur']);
+                }
+            });
         }
         if (! empty($f['du'])) {
             $q->where('cree_le', '>=', $f['du'].' 00:00:00');

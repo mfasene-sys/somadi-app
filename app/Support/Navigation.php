@@ -31,6 +31,7 @@ class Navigation
         'ovins.soins.modele' => 'ovins.soins.catalogue',
         'ovins.soins.modele.create' => 'ovins.soins.catalogue',
         'profil.edit' => 'accueil',
+        'identite.index' => 'accueil',
         'module.a_venir' => 'accueil',
     ];
 
@@ -38,6 +39,7 @@ class Navigation
     private const LIBELLES = [
         'accueil' => 'Accueil',
         'profil.edit' => 'Mon profil',
+        'identite.index' => 'Changer d’identité',
         // Volailles
         'reproducteurs.index' => 'Reproducteurs',
         'reproducteurs.show' => 'Fiche de la bande',

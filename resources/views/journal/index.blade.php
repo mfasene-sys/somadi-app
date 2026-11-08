@@ -30,6 +30,7 @@
                     <span class="w-36 shrink-0 text-xs tabular-nums text-stone-500">{{ \Illuminate\Support\Carbon::parse($l->cree_le)->format('d/m/Y H:i:s') }}</span>
                     <span class="badge bg-stone-100 font-mono text-stone-700">{{ $l->action }}</span>
                     <span class="text-sm text-stone-800">{{ $l->user_nom ?? 'Anonyme' }}</span>
+                    @if (! empty($l->agi_par_nom))<span class="journal-agi-par">par {{ $l->agi_par_nom }}, sous cette identité</span>@endif
                     @if ($l->objet_type)<span class="text-xs text-stone-500">{{ $l->objet_type }} #{{ $l->objet_id }}</span>@endif
                     <x-icone nom="chevron-right" class="ml-auto size-4 text-stone-400 transition group-open:rotate-90"/>
                 </summary>

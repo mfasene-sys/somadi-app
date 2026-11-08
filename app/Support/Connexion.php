@@ -17,7 +17,7 @@ class Connexion
 
     public static function ouvrir(Request $request, User $user, string $methode): void
     {
-        $request->session()->forget(self::ATTENTE);
+        $request->session()->forget([self::ATTENTE, Identite::SESSION]);
         Auth::login($user);
         $request->session()->regenerate();
         // Compatibilité avec les clés de session de l'ancienne application (RG-ACC-002).

@@ -42,7 +42,7 @@
       e.preventDefault();
       alerte('Pas de réseau : la saisie n\'a pas été envoyée. Gardez la page ouverte et réessayez dès le retour de la connexion.');
     }
-    if (form.hasAttribute('data-deconnexion')) { viderCaches(); try { sessionStorage.removeItem('somadi-parcours'); } catch (e2) { /* rien */ } }
+    if (form.hasAttribute('data-deconnexion') || form.hasAttribute('data-changement-identite')) { viderCaches(); try { sessionStorage.removeItem('somadi-parcours'); } catch (e2) { /* rien */ } }
     // Évite les doubles envois (double appui sur mobile).
     if (methode === 'post' && !e.defaultPrevented) {
       var b = form.querySelector('button[type="submit"]');

@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\CodeConnexionController;
 use App\Http\Controllers\Auth\ConnexionController;
 use App\Http\Controllers\Auth\EmpreinteController;
 use App\Http\Controllers\DroitsController;
+use App\Http\Controllers\IdentiteController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\ModuleAVenirController;
 use App\Http\Controllers\ProfilController;
@@ -64,6 +65,11 @@ Route::middleware(['auth', 'compte.actif'])->group(function () {
     Route::post('/mon-profil/empreintes/options', [EmpreinteController::class, 'optionsActivation'])->middleware('throttle:empreinte')->name('profil.empreintes.options');
     Route::post('/mon-profil/empreintes', [EmpreinteController::class, 'activer'])->middleware('throttle:empreinte')->name('profil.empreintes.activer');
     Route::delete('/mon-profil/empreintes/{id}', [EmpreinteController::class, 'retirer'])->whereNumber('id')->name('profil.empreintes.retirer');
+
+    // Changement d'identité (administrateur) : pas de « can: », l'administrateur réel est contrôlé dans le contrôleur.
+    Route::get('/identite', [IdentiteController::class, 'index'])->name('identite.index');
+    Route::post('/identite/revenir', [IdentiteController::class, 'revenir'])->name('identite.revenir');
+    Route::post('/identite/{utilisateur}', [IdentiteController::class, 'prendre'])->whereNumber('utilisateur')->name('identite.prendre');
 
     // ---------- Lot 2 : volailles ----------
     Route::prefix('volailles')->group(function () {

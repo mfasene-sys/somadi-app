@@ -73,7 +73,7 @@ return [
         'ACT' => ['route' => 'activites.index', 'titre' => 'Activités et équipes', 'groupe' => 'organisation', 'lot' => 5, 'icone' => 'check', 'actions' => ['voir' => 'Consulter', 'gerer' => 'Planifier et affecter', 'cloturer' => 'Clôturer une tâche']],
         'RH' => ['route' => 'rh.employes.index', 'titre' => 'Personnel et congés', 'groupe' => 'organisation', 'lot' => 5, 'icone' => 'id', 'actions' => ['voir' => 'Consulter', 'gerer' => 'Gérer absences et congés', 'cloturer' => 'Clôture annuelle des congés']],
 
-        'ACC' => ['titre' => 'Utilisateurs et droits', 'groupe' => 'administration', 'lot' => 1, 'icone' => 'shield', 'route' => 'utilisateurs.index', 'actions' => ['voir' => 'Consulter les utilisateurs', 'gerer' => 'Créer et modifier les utilisateurs', 'droits' => 'Modifier la matrice des droits', 'journal' => 'Consulter le journal']],
+        'ACC' => ['titre' => 'Utilisateurs et droits', 'groupe' => 'administration', 'lot' => 1, 'icone' => 'shield', 'route' => 'utilisateurs.index', 'actions' => ['voir' => 'Consulter les utilisateurs', 'gerer' => 'Créer et modifier les utilisateurs', 'droits' => 'Modifier la matrice des droits', 'journal' => 'Consulter le journal', 'identite' => 'Prendre l’identité d’un utilisateur']],
     ],
 
     /*

@@ -298,7 +298,31 @@ Après cette mise à jour, **le mot de passe seul ne suffit plus** : un code à 
 
 **En cas de panne de l'envoi d'e-mails** : mettez `SOMADI_PIN_EMAIL=false` dans `.env` puis `php artisan config:cache`. La connexion revient au mot de passe seul ; les empreintes continuent de fonctionner. Remettez `true` dès que l'envoi est rétabli.
 
-## 13. Mettre à jour (lots suivants)
+## 13. Changement d'identité (administrateur)
+
+Permet à un administrateur d'agir sous le compte d'un autre utilisateur puis de revenir au sien. Détails : [`IDENTITE.md`](IDENTITE.md).
+
+1. **Sauvegarde de la base** (étape 1).
+2. L'archive `somadi-identite-diff.zip` est **différentielle** (liste dans `LISTE_FICHIERS.txt`, détail ajouté / modifié dans `LISTE_FICHIERS_DETAIL.txt`). Aucun fichier n'est supprimé, `vendor` n'est pas touché. En SSH :
+   ```bash
+   cd /home/somadix
+   unzip -q -o somadi-identite-diff.zip                    # crée le dossier maj-identite/
+   tar -czf sauvegarde-avant-identite.tgz --ignore-failed-read $(cat maj-identite/LISTE_FICHIERS.txt) 2>/dev/null
+   (cd maj-identite/fichiers && sha256sum -c --quiet ../SHA256SUMS.txt) && echo "Archive intacte"
+   php artisan down
+   cp -a maj-identite/fichiers/. /home/somadix/
+   php artisan somadi:installer --force
+   php artisan optimize:clear
+   php artisan config:cache && php artisan route:cache && php artisan view:cache
+   php artisan somadi:verifier
+   php artisan up
+   rm -rf maj-identite somadi-identite-diff.zip
+   ```
+   `somadi:installer` ajoute deux colonnes à `app_journal` (`agi_par_id`, `agi_par_nom`). Aucune table de l'ancienne application n'est modifiée.
+3. Contrôles : connecté en administrateur, menu → « Changer d'identité », prendre l'identité d'un ouvrier : le bandeau jaune apparaît et le menu se réduit à ses droits. « Revenir à mon compte », puis Administration → Utilisateurs → Journal : les lignes `identite.debut` / `identite.fin` portent « par … ».
+4. Revenir en arrière : `php artisan down`, `tar -xzf sauvegarde-avant-identite.tgz`, supprimer les fichiers marqués « ajouté » dans `LISTE_FICHIERS_DETAIL.txt`, `php artisan optimize:clear`, les trois commandes `…:cache`, puis `php artisan up`. Les deux colonnes ajoutées peuvent rester : elles sont ignorées.
+
+## 14. Mettre à jour (lots suivants)
 
 1. Sauvegarde de la base (étape 1).
 2. `php artisan down` (page de maintenance).
@@ -306,7 +330,7 @@ Après cette mise à jour, **le mot de passe seul ne suffit plus** : un code à 
 4. `php artisan somadi:installer --force` puis les trois commandes `…:cache`.
 5. `php artisan up`.
 
-## 14. Revenir en arrière
+## 15. Revenir en arrière
 
 La nouvelle application n'a pas modifié la structure des tables existantes. Les saisies faites avec elle (ponte, lots, soins…) sont enregistrées dans les tables habituelles et restent visibles dans l'ancienne application. Pour la retirer complètement :
 - retirez le domaine du multisite et supprimez les dossiers et fichiers ajoutés dans `/home/somadix` à l'étape 4 (en gardant `www/` et vos autres dossiers) ;

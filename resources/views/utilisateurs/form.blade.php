@@ -1,5 +1,13 @@
 @php($nouveau = ! $utilisateur->exists)
 <x-layouts.app :titre="$nouveau ? 'Nouvel utilisateur' : $utilisateur->nomComplet()" :sous-titre="$nouveau ? null : $utilisateur->email">
+    @if (! $nouveau && auth()->user()->can('ACC.identite') && \App\Support\Identite::refus(auth()->user(), $utilisateur) === null)
+        <x-slot:actions>
+            <form method="POST" action="{{ route('identite.prendre', $utilisateur) }}" data-changement-identite>
+                @csrf
+                <button type="submit" class="btn-secondaire"><x-icone nom="users" class="size-4"/>Prendre son identité</button>
+            </form>
+        </x-slot:actions>
+    @endif
     <form method="POST" action="{{ $nouveau ? route('utilisateurs.store') : route('utilisateurs.update', $utilisateur) }}" class="carte max-w-2xl space-y-6 p-5 sm:p-6">
         @csrf
         @unless ($nouveau) @method('PUT') @endunless

@@ -3,6 +3,7 @@
 use App\Http\Middleware\CompteActif;
 use App\Exceptions\RegleMetier;
 use App\Http\Middleware\EntetesSecurite;
+use App\Http\Middleware\IdentiteEmpruntee;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [EntetesSecurite::class]);
+        $middleware->web(append: [EntetesSecurite::class, IdentiteEmpruntee::class]);
         $middleware->alias(['compte.actif' => CompteActif::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('accueil'));

@@ -16,7 +16,7 @@ class Droits
     private static array $cache = [];
 
     /** Actions réservées exclusivement au rôle admin. */
-    public const RESERVEES_ADMIN = ['EXE.cloturer', 'ACC.droits'];
+    public const RESERVEES_ADMIN = ['EXE.cloturer', 'ACC.droits', 'ACC.identite'];
 
     /** @return array<string, array{titre:string, groupe:string, lot:int, actions:array<string,string>}> */
     public static function modules(): array

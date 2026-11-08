@@ -5,6 +5,7 @@
     $raccourcis = collect($menu)->flatMap(fn ($g) => $g['entrees'])->keyBy('code');
     $bas = collect(['PIL', 'PON', 'VOL', 'VEN', 'OVA', 'OVS'])->filter(fn ($c) => $raccourcis->has($c))->take(3)->map(fn ($c) => $raccourcis[$c]);
     $titrePage = $titre ? $titre.' · SOMADI' : 'SOMADI Farming';
+    $identite = \App\Support\Identite::infos();
 @endphp
 <!DOCTYPE html>
 <html lang="fr" class="h-full">
@@ -19,6 +20,7 @@
     <meta name="somadi-parent" content="{{ \App\Support\Navigation::parentDe(request())['chemin'] ?? '' }}">
     <meta name="somadi-formulaire" content="{{ \App\Support\Navigation::estFormulaire(request()) ? '1' : '0' }}">
     <meta name="somadi-statique" content="{{ \App\Support\Navigation::estStatique(request()) ? '1' : '0' }}">
+    @if (session('vider_cache_hors_ligne'))<meta name="somadi-vider-cache" content="1">@endif
     <title>{{ $titrePage }}</title>
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="icon" href="{{ asset('icons/icon-192.png') }}" type="image/png">
@@ -51,6 +53,25 @@
 </div>
 
 <div class="flex min-h-full flex-col lg:pl-64">
+    @if ($identite)
+        {{-- Changement d'identité en cours : toujours visible, avec le retour en un clic. --}}
+        <div class="bandeau-identite" role="status">
+            <div class="bandeau-identite-contenu">
+                <x-icone nom="user" class="size-5 shrink-0"/>
+                <p class="bandeau-identite-texte">
+                    Vous agissez en tant que <strong>{{ $user->nomComplet() }}</strong> ({{ \App\Support\Roles::libelle($user->role) }}).
+                    Les saisies sont faites à son nom et tracées comme faites par {{ $identite['nom'] }}.
+                </p>
+                <div class="bandeau-identite-actions">
+                    <a href="{{ route('identite.index') }}" class="lien-identite">Changer</a>
+                    <form method="POST" action="{{ route('identite.revenir') }}" data-changement-identite>
+                        @csrf
+                        <button type="submit" class="btn-identite">Revenir à mon compte</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
     {{-- Barre du haut : mobile --}}
     <header class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-stone-200 bg-white/95 px-3 backdrop-blur lg:hidden" style="padding-top: env(safe-area-inset-top)">
         <button type="button" class="rounded-lg p-2 text-stone-600 hover:bg-stone-100" data-ouvrir-tiroir aria-label="Ouvrir le menu">
@@ -59,7 +80,7 @@
         <a href="{{ route('accueil') }}" class="flex items-center gap-2 font-semibold text-ferme-800">
             <img src="{{ asset('icons/icon-192.png') }}" alt="" class="size-7 rounded-md">SOMADI
         </a>
-        <a href="{{ route('profil.edit') }}" class="ml-auto grid size-9 place-items-center rounded-full bg-ferme-100 text-sm font-semibold text-ferme-800" aria-label="Mon profil">{{ $user->initiales() }}</a>
+        <a href="{{ route('profil.edit') }}" class="ml-auto grid size-9 place-items-center rounded-full bg-ferme-100 text-sm font-semibold text-ferme-800 {{ $identite ? 'avatar-identite' : '' }}" aria-label="Mon profil">{{ $user->initiales() }}</a>
     </header>
 
     <main class="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-10 lg:pt-8">

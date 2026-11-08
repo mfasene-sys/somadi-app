@@ -6,3 +6,15 @@
 .nav-fil:hover{color:var(--color-ferme-700,#2f6b45);text-decoration:underline}
 .nav-retour-pc{display:none}
 @media (min-width:64rem){.nav-retour-pc{display:inline}}
+
+/* Changement d'identité : bandeau et marques (ajout manuel, hors compilation Tailwind). */
+.bandeau-identite{position:relative;z-index:25;background:var(--color-paille-100,#fbf0d4);border-bottom:1px solid var(--color-paille-500,#e0b44f);color:#5a3d0f;font-size:.875rem;padding:.5rem 1rem}
+@media (min-width:64rem){.bandeau-identite{position:sticky;top:0}}
+.bandeau-identite-contenu{max-width:72rem;margin-inline:auto;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem}
+.bandeau-identite-texte{flex:1 1 16rem;min-width:0}
+.bandeau-identite-actions{display:flex;flex-wrap:wrap;gap:.5rem}
+.bandeau-identite .lien-identite{font-weight:600;text-decoration:underline;color:inherit}
+.btn-identite{display:inline-flex;align-items:center;gap:.375rem;border-radius:.5rem;background:#7a5212;color:#fff;font-weight:600;font-size:.8125rem;padding:.375rem .75rem;white-space:nowrap}
+.btn-identite:hover{background:#5a3d0f}
+.avatar-identite{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--color-paille-500,#e0b44f)}
+.journal-agi-par{color:#7a5212;font-size:.75rem}
